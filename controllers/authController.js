@@ -1,37 +1,55 @@
 import dotenv from "dotenv";
 import joi from "joi";
-import bcrypt from 'bcrypt';
-import {db} from '../database/mongoDB.js';
+import bcrypt, { compareSync } from "bcrypt";
+import { db } from "../database/mongoDB.js";
+import { v4 as uuid } from "uuid";
 
 dotenv.config();
 
 //Sing-up
-export async function createUser (req, res){
+export async function createUser(req, res) {
+  const usuario = req.body;
+  const usuarioSchema = joi.object({
+    name: joi.string().required(),
+    email: joi.string().required(),
+    password: joi.string().required(),
+    passwordValid: joi.ref("password"),
+  });
 
-    const usuario = req.body;
-    const usuarioSchema = joi.object(
-        {
-            name: joi.string().required(),
-            email: joi.string().required(),
-            password: joi.string().required(),
-            passwordValid: joi.ref('password')
-        }
-    )
+  const usedEmail = await db
+    .collection("cadastros")
+    .findOne({ email: usuario.email });
 
-    const usedEmail = await db.collection('cadastros').findOne({email: usuario.email});
+  if (usedEmail) {
+    return res.status(409).send("Email já cadastrado");
+  }
 
-    if(usedEmail){
-        return res.status(409).send("Email já cadastrado");
-    }
+  const { error } = usuarioSchema.validate(usuario);
+  if (error) {
+    return res.sendStatus(422);
+  }
 
-    const {error} = usuarioSchema.validate(usuario);
-    if (error){
-        return res.sendStatus(422);
-    }
+  const passwordHash = bcrypt.hashSync(usuario.password, 10);
 
-    const passwordHash = bcrypt.hashSync(usuario.password, 10);
+  await db.collection("cadastros").insertOne({
+    ...usuario,
+    password: passwordHash,
+    passwordValid: passwordHash,
+  });
 
-    await db.collection('cadastros').insertOne({ ...usuario, password: passwordHash, passwordValid: passwordHash });
+  res.status(201).send("Usuário criado");
+}
 
-    res.status(201).send('Usuário criado');
-};
+export async function login(req, res) {
+  const { email, password } = req.body;
+
+  const user = await db.collection("cadastros").findOne({ email });
+
+  if (user && compareSync(password, user.password)) {
+    const token = uuid();
+    await db.collection("sessions").insertOne({ userId: user._id, token });
+    return res.send({ token, user });
+  }
+
+  res.status(422).send("Email e/ou senha incorretos!");
+}
