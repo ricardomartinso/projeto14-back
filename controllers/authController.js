@@ -49,6 +49,7 @@ export async function login(req, res) {
   if (user && compareSync(password, user.password)) {
     const token = uuid();
     await db.collection("sessions").insertOne({ userId: user._id, token });
+    delete user.password, user.passwordValid, user.email;
     return res.send({ token, user });
   }
 
