@@ -6,7 +6,7 @@ import { v4 as uuid } from "uuid";
 
 dotenv.config();
 
-//Sing-up
+//Sign-Up
 export async function createUser(req, res) {
   const usuario = req.body;
   const usuarioSchema = joi.object({
@@ -40,6 +40,7 @@ export async function createUser(req, res) {
   res.status(201).send("Usuário criado");
 }
 
+//Sign-In
 export async function login(req, res) {
   const { email, password } = req.body;
 

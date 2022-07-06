@@ -4,7 +4,7 @@ import { loginSchemaValidation } from "../middlewares/loginSchemaValidationMiddl
 
 const router = Router();
 
-//Sing-In
+//Sign-Up
 router.post("/cadastro", createUser);
 
 //Sign-In
