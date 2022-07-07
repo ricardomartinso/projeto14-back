@@ -49,11 +49,11 @@ export async function login(req, res) {
   if (user && compareSync(password, user.password)) {
     const chaveSecreta = process.env.JWT_SECRET;
 
-    const configuracoes = { expiresIn: 60 };
+    const configuracoes = { expiresIn: 120 };
 
     const token = jwt.sign(user._id, chaveSecreta, configuracoes);
 
-    await db.collection("sessions").insertOne({ token });
+    await db.collection("sessions").insertOne(token);
 
     return res.send(token);
   }
