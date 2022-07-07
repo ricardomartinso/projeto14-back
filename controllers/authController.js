@@ -3,6 +3,7 @@ import joi from "joi";
 import bcrypt, { compareSync } from "bcrypt";
 import { db } from "../database/mongoDB.js";
 import { v4 as uuid } from "uuid";
+import { MinKey } from "mongodb";
 
 dotenv.config();
 
@@ -12,7 +13,7 @@ export async function createUser(req, res) {
   const usuarioSchema = joi.object({
     name: joi.string().required(),
     email: joi.string().required(),
-    password: joi.string().required(),
+    password: joi.string().required().pattern(new RegExp('^[a-zA-Z0-9]{6,30}$')),
     passwordValid: joi.ref("password"),
   });
 
