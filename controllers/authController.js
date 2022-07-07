@@ -48,10 +48,10 @@ export async function login(req, res) {
 
   if (user && compareSync(password, user.password)) {
     const chaveSecreta = process.env.JWT_SECRET;
-
+    const dados = { token: user._id };
     const configuracoes = { expiresIn: 120 };
 
-    const token = jwt.sign(user._id, chaveSecreta, configuracoes);
+    const token = jwt.sign(dados, chaveSecreta, configuracoes);
 
     await db.collection("sessions").insertOne(token);
 
