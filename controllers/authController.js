@@ -3,6 +3,7 @@ import joi from "joi";
 import bcrypt, { compareSync } from "bcrypt";
 import { db } from "../database/mongoDB.js";
 import jwt from "jsonwebtoken";
+import { ObjectId } from "mongodb";
 
 dotenv.config();
 
@@ -48,7 +49,7 @@ export async function login(req, res) {
 
   if (user && compareSync(password, user.password)) {
     const chaveSecreta = process.env.JWT_SECRET;
-    const dados = { token: user._id };
+    const dados = { token: ObjectId(user._id) };
     const configuracoes = { expiresIn: 120 };
 
     const token = jwt.sign(dados, chaveSecreta, configuracoes);
