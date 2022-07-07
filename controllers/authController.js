@@ -2,8 +2,8 @@ import dotenv from "dotenv";
 import joi from "joi";
 import bcrypt, { compareSync } from "bcrypt";
 import { db } from "../database/mongoDB.js";
-import { v4 as uuid } from "uuid";
-import { MinKey } from "mongodb";
+import jwt from "jsonwebtoken";
+import { ObjectId } from "mongodb";
 
 dotenv.config();
 
@@ -48,11 +48,22 @@ export async function login(req, res) {
   const user = await db.collection("cadastros").findOne({ email });
 
   if (user && compareSync(password, user.password)) {
-    const token = uuid();
+    const chaveSecreta = process.env.JWT_SECRET;
+    const configuracoes = {
+      expiresIn: 60 * 20,
+    };
+
+    const dados = {
+      email: user.email,
+    };
+
+    const token = jwt.sign(dados, chaveSecreta, configuracoes);
     await db.collection("sessions").insertOne({ userId: user._id, token });
-    delete user.password;
-    delete user.passwordValid;
-    delete user.email;
+
+    delete user.password,
+      delete user.passwordValid,
+      delete user.email,
+      delete user._id;
 
     return res.send({ token, user });
   }
