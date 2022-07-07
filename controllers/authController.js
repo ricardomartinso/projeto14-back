@@ -49,14 +49,23 @@ export async function login(req, res) {
 
   if (user && compareSync(password, user.password)) {
     const chaveSecreta = process.env.JWT_SECRET;
-    const dados = { token: ObjectId(user._id) };
-    const configuracoes = { expiresIn: 120 };
+    const configuracoes = {
+      expiresIn: 60 * 20,
+    };
+
+    const dados = {
+      email: user.email,
+    };
 
     const token = jwt.sign(dados, chaveSecreta, configuracoes);
+    await db.collection("sessions").insertOne({ userId: user._id, token });
 
-    await db.collection("sessions").insertOne(token);
+    delete user.password,
+      delete user.passwordValid,
+      delete user.email,
+      delete user._id;
 
-    return res.send(token);
+    return res.send({ token, user });
   }
 
   res.status(422).send("Email e/ou senha incorretos!");
