@@ -3,6 +3,7 @@ import joi from "joi";
 import bcrypt, { compareSync } from "bcrypt";
 import { db } from "../database/mongoDB.js";
 import { v4 as uuid } from "uuid";
+import jwt from "jsonwebtoken";
 
 dotenv.config();
 
@@ -47,13 +48,15 @@ export async function login(req, res) {
   const user = await db.collection("cadastros").findOne({ email });
 
   if (user && compareSync(password, user.password)) {
-    const token = uuid();
-    await db.collection("sessions").insertOne({ userId: user._id, token });
-    delete user.password;
-    delete user.passwordValid;
-    delete user.email;
+    const chaveSecreta = process.env.JWT_SECRET;
 
-    return res.send({ token, user });
+    const configuracoes = { expiresIn: 60 };
+
+    const token = jwt.sign(user._id, chaveSecreta, configuracoes);
+
+    await db.collection("sessions").insertOne({ token });
+
+    return res.send({ token });
   }
 
   res.status(422).send("Email e/ou senha incorretos!");
