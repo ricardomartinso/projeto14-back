@@ -2,7 +2,6 @@ import dotenv from "dotenv";
 import joi from "joi";
 import bcrypt, { compareSync } from "bcrypt";
 import { db } from "../database/mongoDB.js";
-import { v4 as uuid } from "uuid";
 import jwt from "jsonwebtoken";
 
 dotenv.config();
@@ -56,7 +55,7 @@ export async function login(req, res) {
 
     await db.collection("sessions").insertOne({ token });
 
-    return res.send({ token });
+    return res.send(token);
   }
 
   res.status(422).send("Email e/ou senha incorretos!");
