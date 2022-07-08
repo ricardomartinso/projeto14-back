@@ -9,4 +9,5 @@ router.post("/cadastro", createUser);
 
 //Sign-In
 router.post("/login", loginSchemaValidation, login);
+
 export default router;
