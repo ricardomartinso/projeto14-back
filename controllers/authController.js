@@ -47,25 +47,53 @@ export async function login(req, res) {
 
   const user = await db.collection("cadastros").findOne({ email });
 
-  if (user && compareSync(password, user.password)) {
-    const chaveSecreta = process.env.JWT_SECRET;
-    const configuracoes = {
-      expiresIn: 60 * 20,
-    };
+  const hasToken = await db
+    .collection("sessions")
+    .findOne({ userId: user._id });
 
-    const dados = {
-      email: user.email,
-    };
+  if (hasToken) {
+    await db.collection("sessions").deleteOne({ userId: user._id });
+    if (user && compareSync(password, user.password)) {
+      const chaveSecreta = process.env.JWT_SECRET;
+      const configuracoes = {
+        expiresIn: 60 * 20,
+      };
 
-    const token = jwt.sign(dados, chaveSecreta, configuracoes);
-    await db.collection("sessions").insertOne({ userId: user._id, token });
+      const dados = {
+        email: user.email,
+      };
 
-    delete user.password,
-      delete user.passwordValid,
-      delete user.email,
-      delete user._id;
+      const token = jwt.sign(dados, chaveSecreta, configuracoes);
+      await db.collection("sessions").insertOne({ userId: user._id, token });
 
-    return res.send({ token, user });
+      delete user.password,
+        delete user.passwordValid,
+        delete user.email,
+        delete user._id;
+
+      return res.send({ token, user });
+    }
+  } else {
+    if (user && compareSync(password, user.password)) {
+      const chaveSecreta = process.env.JWT_SECRET;
+      const configuracoes = {
+        expiresIn: 60 * 20,
+      };
+
+      const dados = {
+        email: user.email,
+      };
+
+      const token = jwt.sign(dados, chaveSecreta, configuracoes);
+      await db.collection("sessions").insertOne({ userId: user._id, token });
+
+      delete user.password,
+        delete user.passwordValid,
+        delete user.email,
+        delete user._id;
+
+      return res.send({ token, user });
+    }
   }
 
   res.status(422).send("Email e/ou senha incorretos!");
