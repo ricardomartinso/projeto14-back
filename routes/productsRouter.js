@@ -5,6 +5,6 @@ import { Router } from "express";
 const router = Router();
 
 //Renderizar mensagens
-router.get("/", RenderProducts);
+router.get("/products", RenderProducts);
 
 export default router;
