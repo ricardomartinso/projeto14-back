@@ -71,14 +71,16 @@ export async function login(req, res) {
         };
 
         const token = jwt.sign(dados, chaveSecreta, configuracoes);
-        await db.collection("sessions").insertOne({ token });
-        console.log(token);
+        await db.collection("sessions").insertOne({ token, userId: user._id });
+
         delete user.password,
           delete user.passwordValid,
           delete user.email,
           delete user._id;
 
         return res.send({ token, user });
+      } else {
+        return res.sendStatus(422);
       }
     } else {
       if (user && compareSync(password, user.password)) {
@@ -93,7 +95,7 @@ export async function login(req, res) {
         };
 
         const token = jwt.sign(dados, chaveSecreta, configuracoes);
-        await db.collection("sessions").insertOne({ token });
+        await db.collection("sessions").insertOne({ token, userId: user._id });
 
         delete user.password,
           delete user.passwordValid,
@@ -101,6 +103,8 @@ export async function login(req, res) {
           delete user._id;
 
         return res.send({ token, user });
+      } else {
+        return res.sendStatus(422);
       }
     }
   } catch {
