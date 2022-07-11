@@ -11,12 +11,9 @@ dotenv.config();
 export async function createUser(req, res) {
   const usuario = req.body;
   const usuarioSchema = joi.object({
-    name: joi.string().required(),
-    email: joi.string().required(),
-    password: joi
-      .string()
-      .required()
-      .pattern(new RegExp("^[a-zA-Z0-9]{6,30}$")),
+    name: joi.string().required().min(4),
+    email: joi.string().required().min(4),
+    password: joi.string().required().min(4),
     passwordValid: joi.ref("password"),
   });
 
