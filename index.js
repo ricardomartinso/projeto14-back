@@ -17,6 +17,6 @@ app.use(authRouter);
 app.use(productsRouter);
 app.use(checkoutRouter);
 
-app.listen(5000, () => {
+app.listen(PORT, () => {
   console.log(`Servidor funcionando na porta ${PORT}`);
 });
