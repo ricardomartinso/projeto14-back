@@ -8,6 +8,6 @@ const router = Router();
 router.get("/products", renderProducts);
 
 //Renderiza promoções
-router.get("/sale" , renderSale)
+router.get("/sale", renderSale);
 
 export default router;
